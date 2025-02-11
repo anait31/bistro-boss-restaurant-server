@@ -9,6 +9,10 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// DB_USER=bistrobossadmin
+// DB_PASSWORD=lx19XzhNEoA96urN
+// ACCESS_TOKEN=f7fc6e804f0b0c597b7cab58bd175c036c5dc7e9bee8c824dc0b18a8905769d401dbe135f3d7237a3b1dade58a47560e2af93a87028bfd2a70f2f9f9e683b23f
+
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -41,7 +45,7 @@ async function run() {
                 expiresIn: '1h'
             })
             res.send({ token });
-            
+
         })
 
         const verifyToken = (req, res, next) => {

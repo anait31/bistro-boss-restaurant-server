@@ -39,29 +39,29 @@ async function run() {
 
 
         // JWT Related API
-        app.post('/jwt', async (req, res) => {
-            const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
-                expiresIn: '1h'
-            })
-            res.send({ token });
+        // app.post('/jwt', async (req, res) => {
+        //     const user = req.body;
+        //     const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        //         expiresIn: '1h'
+        //     })
+        //     res.send({ token });
 
-        })
+        // })
 
-        const verifyToken = (req, res, next) => {
+        // const verifyToken = (req, res, next) => {
             // console.log('Inside Verify Token', req.headers.authorization);
-            if (!req.headers.authorization) {
-                return res.status(401).send({ message: 'Unauthorized Access' });
-            }
-            const token = req.headers.authorization.split(' ')[1];
-            jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
-                if (error) {
-                    return res.status(401).send({ message: 'Unauthorized Access' });
-                }
-                req.decoded = decoded;
-                next()
-            })
-        }
+        //     if (!req.headers.authorization) {
+        //         return res.status(401).send({ message: 'Unauthorized Access' });
+        //     }
+        //     const token = req.headers.authorization.split(' ')[1];
+        //     jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+        //         if (error) {
+        //             return res.status(401).send({ message: 'Unauthorized Access' });
+        //         }
+        //         req.decoded = decoded;
+        //         next()
+        //     })
+        // }
 
         // User Collections
         app.post('/users', async (req, res) => {
@@ -75,7 +75,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users', verifyToken, async (req, res) => {
+        app.get('/users', async (req, res) => {
             // console.log(req.headers)
             const result = await usersCollections.find().toArray();
             res.send(result);
@@ -93,7 +93,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/user/admin/:email', verifyToken, async(req, res) => {
+        app.get('/user/admin/:email', async(req, res) => {
             const email = req.params?.email;
             if(email !== req?.decoded?.email) {
                 return res.status(403).send({message: 'unauthorizes Access'})

@@ -30,7 +30,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const usersCollections = client.db("bistroBossDB").collection("users");
         const menuCollections = client.db("bistroBossDB").collection("menus");
@@ -39,29 +39,31 @@ async function run() {
 
 
         // JWT Related API
-        // app.post('/jwt', async (req, res) => {
-        //     const user = req.body;
-        //     const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
-        //         expiresIn: '1h'
-        //     })
-        //     res.send({ token });
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+                expiresIn: '1h'
+            })
+            res.send({ token });
 
-        // })
+        })
 
-        // const verifyToken = (req, res, next) => {
-            // console.log('Inside Verify Token', req.headers.authorization);
-        //     if (!req.headers.authorization) {
-        //         return res.status(401).send({ message: 'Unauthorized Access' });
-        //     }
-        //     const token = req.headers.authorization.split(' ')[1];
-        //     jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
-        //         if (error) {
-        //             return res.status(401).send({ message: 'Unauthorized Access' });
-        //         }
-        //         req.decoded = decoded;
-        //         next()
-        //     })
-        // }
+        const verifyToken = (req, res, next) => {
+            // console.log('Inside Verify Token', req.headers);
+            if (!req.headers.authorization) {
+                return res.status(401).send({ message: 'Unauthorized Access' });
+            }
+            const token = req.headers.authorization.split(' ')[1];
+            console.log('Tokeeeeeeeeeeeeeeeeen', token); 
+            jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+                if (error) {
+                    console.log('Errorrrrrrrrrrrrr inside verify ERROR')
+                    return res.status(401).send({ message: 'Unauthorized Access' });
+                }
+                req.decoded = decoded;
+                next()
+            })
+        }
 
         // User Collections
         app.post('/users', async (req, res) => {
@@ -75,7 +77,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyToken, async (req, res) => {
             // console.log(req.headers)
             const result = await usersCollections.find().toArray();
             res.send(result);
@@ -93,11 +95,11 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/user/admin/:email', async(req, res) => {
+        app.get('/user/admin/:email', verifyToken, async(req, res) => {
             const email = req.params?.email;
-            if(email !== req?.decoded?.email) {
-                return res.status(403).send({message: 'unauthorizes Access'})
-            }
+            // if(email !== req.decoded?.email) {
+            //     return res.status(403).send({message: 'Unauthorizes Access'})
+            // }
 
             const query = {email: email};
             const user = await usersCollections.findOne(query);
@@ -108,7 +110,7 @@ async function run() {
             res.send({admin})
         })
 
-        app.delete('/users/:id', async (req, res) => {
+        app.delete('/users/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await usersCollections.deleteOne(query);
@@ -148,8 +150,8 @@ async function run() {
         })
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
